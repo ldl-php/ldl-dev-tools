@@ -1,0 +1,31 @@
+#!/bin/bash
+
+[ -z "$1" ] && echo -e "Must specify container name as the first argument\n" && exit 1
+
+export containerName="$1"
+export container=$(sudo docker ps --filter "name=$containerName" --format "{{.ID}}")
+
+echo $container;
+
+if [ -z "$container" ]
+	then 
+		echo "No container with label \"$containerName\" was found"
+		echo "Available containers: ";
+		docker ps --format "{{.Names}}"
+		exit 1
+	fi
+
+export command="$2"
+
+if [ -z "$2" ]
+	then
+		export command="/bin/bash";
+fi;
+	
+sudo docker ps
+echo "Executing $command in $containerName ..."
+
+export ARGS=${@:2}
+[[ -z "$ARGS" ]] && export ARGS="/bin/bash"
+
+sudo docker exec -it $container $ARGS

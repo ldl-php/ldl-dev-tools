@@ -1,0 +1,7 @@
+#!/bin/bash
+
+which composer &>/dev/null
+
+[ $? -gt 0 ] && echo "composer was not found in your system path!" && exit 1
+
+rm -f $(pwd)/composer.lock; composer clearcache; rm -rf ./vendor; composer install

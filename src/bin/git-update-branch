@@ -1,0 +1,13 @@
+#!/bin/bash
+
+export CURRENT=$(git branch|grep '*'| sed s/'\* '//g)
+export TEMP="temp_$(date +"%Y-%m-%d_%H-%M-%S")";
+
+git checkout master
+git checkout -b "$TEMP"
+git branch -D "$CURRENT"
+git fetch origin
+git checkout $CURRENT
+git branch -D "$TEMP"
+
+echo "Branch udpated"
