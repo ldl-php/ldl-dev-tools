@@ -1,0 +1,96 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+
+function runTest($file, string $outputFile, bool $isDynamic=false, bool $overwriteOutput=false) : void
+{
+    echo "\n\n".str_repeat('-', 80)."\n";
+    echo "Running example: $file\n";
+    echo str_repeat('-', 80)."\n\n\n";
+
+    exec("php -f $file", $output, $return);
+
+    $output = implode("\n", $output);
+
+    echo "\n".str_repeat('*', 80)."\n";
+    echo "Result:\n";
+    echo str_repeat('*', 80)."\n\n\n";
+
+    echo $output."\n";
+
+    if($isDynamic){
+        echo str_repeat('!', 80)."\n\n\n";
+        echo "This is a dynamic example, output changes every time the example is executed\n";
+        echo "Please check the output by yourself, script output will NOT be saved\n";
+        echo str_repeat('!', 80)."\n\n\n";
+        readline("Check the output, if you are sure it's correct, then press any key to continue ...\n\n");
+        return;
+    }
+
+    $expected = file_exists($outputFile) ? file_get_contents($outputFile) : null;
+
+    if(null !== $expected && !$overwriteOutput && $expected !== $output){
+        echo "\n".str_repeat('*', 80)."\n";
+        echo "Expected:\n";
+        echo str_repeat('*', 80)."\n\n\n";
+
+        echo var_export($expected, true)."\n";
+
+        throw new \LogicException("Expected outputs differ!");
+    }
+
+    file_put_contents($outputFile, $output);
+
+    if(0 === $return){
+        return;
+    }
+
+    throw new \RuntimeException('TEST FAIL!');
+}
+
+$directory = array_key_exists(1, $_SERVER['argv']) ? $_SERVER['argv'][1] : '.';
+$outputDir = implode(\DIRECTORY_SEPARATOR, [$directory, 'output']);
+$sleep = isset($_SERVER['argv'][2]) ? (int)$_SERVER['argv'][2] : 0;
+
+if(!is_dir($directory)){
+    throw new \InvalidArgumentException('First argument must be a directory containing PHP files');
+}
+
+if(!is_dir($outputDir) && !mkdir($outputDir, 0755)){
+    throw new \LogicException("Could not create output directory: $outputDir");
+}
+
+$dp = new DirectoryIterator($directory);
+
+$failed = [];
+
+foreach($dp as $file){
+
+    if($file->isDir() || $file->getExtension() !==  'php'){
+        continue;
+    }
+
+    $isDynamic = (bool) preg_match('/_Dynamic/', $file->getFileName());
+
+    $outputFile = sprintf('%s%s%s.out', $outputDir, \DIRECTORY_SEPARATOR, substr($file->getFileName(), 0, strrpos($file->getFileName(),'.')));
+
+    try{
+        runTest($file->getRealPath(), $outputFile, $isDynamic);
+    }catch(\Exception $e){
+        $failed[] = $file->getRealPath();
+    }
+
+    sleep($sleep);
+}
+
+if(count($failed) === 0){
+    echo "\n\n****************************************************\n";
+    echo "All examples have run with no exceptions\n";
+    exit(0);
+}
+
+echo "\n".str_repeat('!', 80)."\n";
+echo "The following examples have failed!!!\n";
+echo "NOTE: If these examples output dynamic values, please suffix the file names with _Dynamic\n";
+echo str_repeat('!', 80)."\n\n";
+echo implode("\n", $failed);
+exit(1);
