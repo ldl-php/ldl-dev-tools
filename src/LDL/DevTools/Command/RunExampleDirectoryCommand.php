@@ -72,22 +72,34 @@ class RunExampleDirectoryCommand extends Command
                 ConsoleInputHelper::readInput('Script paused, press any key to continue ...');
             }
 
-            if(!$result->isSuccess()){
+            if(false === $result->isSuccess()){
                 $failed[] = $result;
-                continue;
             }
 
-            if ($result->getPreviousOutputFile() && $result->hasDiff()) {
-                $diff[] = $result;
-            }
+            if($result->isSuccess() && $result->hasDiff() && $result->getPreviousOutputFile()){
+                $accept = $input->getOption('accept-diff');
 
-            if($interactive && $result->hasDiff()){
-                $result->runDiffCommand();
-                $accept = RunExampleCommandHelper::printDiffMenu($output, $result, $input->getOption('accept-diff'));
-
-                if('n' !== $accept){
-                    array_pop($diff);
+                if($interactive){
+                    $result->runDiffCommand();
+                    $accept = RunExampleCommandHelper::printDiffMenu($output, $result);
+                    $output->writeln(str_repeat('-', 80)."\n");
                 }
+
+
+                switch($accept){
+                    case 'y':
+                        $result->overwriteOutput();
+                        break;
+
+                    case 'm':
+                        $result->markAsDynamic();
+                        break;
+
+                    case 'n':
+                        $diff[] = $result;
+                        break;
+                }
+
             }
 
             if ($result->isDynamic()) {
