@@ -1,0 +1,11 @@
+{
+    "require": {
+        "symfony/console": "^5.3",
+        "ext-readline": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "": "src"
+        }
+    }
+}
