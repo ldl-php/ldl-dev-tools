@@ -1,0 +1,53 @@
+#!/bin/bash
+
+echo "php-cs-fixer pre commit hook start"
+
+PHP_CS_FIXER="./vendor/bin/php-cs-fixer"
+HAS_PHP_CS_FIXER=false
+
+if [ -x vendor/bin/php-cs-fixer ]; then
+    HAS_PHP_CS_FIXER=true
+fi
+
+if $HAS_PHP_CS_FIXER; then
+    git status --porcelain | grep -e '^[ AM]\(.*\).php$' | cut -c 3- | while read line; do
+        $PHP_CS_FIXER fix "$line" --diff --rules=@Symfony,\
+-dir_constant,\
+-ereg_to_preg,\
+-error_suppression,\
+-fopen_flag_order,\
+-fopen_flags,\
+-function_to_constant,\
+-implode_call,\
+-is_null,\
+-modernize_types_casting,\
+-native_constant_invocation,\
+-native_function_invocation,\
+-no_alias_functions,\
+-no_homoglyph_names,\
+-non_printable_character,\
+-php_unit_construct,\
+-php_unit_mock_short_will_return,\
+-psr_autoloading,\
+-self_accessor,\
+-set_type_to_cast,\
+-single_class_element_per_statement,\
+-protected_to_private,\
+-short_scalar_cast,\
+-single_line_after_imports,\
+-single_line_comment_style,\
+-single_quote,\
+-standardize_increment,\
+-standardize_not_equals,\
+-no_blank_lines_after_phpdoc,\
+-no_blank_lines_after_class_opening,\
+-increment_style;
+        git add "$line";
+    done
+else
+    echo ""
+    echo "Please install php-cs-fixer"
+    echo ""
+fi
+
+echo "php-cs-fixer pre commit hook finish"
