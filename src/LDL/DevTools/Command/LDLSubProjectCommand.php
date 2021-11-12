@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace LDL\DevTools\Command;
 
 use Exception;
-use InvalidArgumentException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -68,69 +67,56 @@ class LDLSubProjectCommand extends Command
      */
     protected function execute(InputInterface $shellInput, OutputInterface $shellOutput): int
     {
-
         $library = $shellInput->getArgument('library');
-        
-        $this->validateLibrary($library);
 
-        $exitCode = self::SUCCESS;
+        if('' === trim($library)){
+            throw new Exception('Invalid destination directory provided');
+        }
 
-        $libraryPath = $this->currentWorkingDirectory . '/' .$library;
+        $libraryPath = $this->currentWorkingDirectory . DIRECTORY_SEPARATOR . $library;
+
+        if(is_dir($libraryPath)){
+            $shellOutput->writeln("<error>Destination directory {$library} already exists!");
+            return self::FAILURE;
+        }
+
+        if(!is_writable($this->currentWorkingDirectory)){
+            $shellOutput->writeln("<error>Current working directory is not writable</error>");
+            return self::FAILURE;
+        }
 
         //clone ldl-project-template and rename to appropriate directory
         exec("git clone https://github.com/pthreat/ldl-project-template.git {$library} 2>&1 >/dev/null", $output, $resultCode);
 
         if ($resultCode > 0) {
-            $shellOutput->writeln("<bg=red>" . @$output[0] . "</>");
-            $exitCode = self::FAILURE;
-        } else {            
-            // delete .git folder of template (replace this with proper directory function)
-            exec("rm -rf {$libraryPath}/.git 2>&1 >/dev/null");
-
-            $output = [];
-
-            /**
-             * initialize git folder
-             * install php cs fixer in quite mode
-             */
-            exec("cd {$libraryPath} && git init && composer require friendsofphp/php-cs-fixer -q 2>&1 >/dev/null", $output, $resultCode);
-
-            if ($resultCode > 0) {
-                $shellOutput->writeln("<bg=red>" . @$output[0] . "</>");
-                $exitCode = self::FAILURE;
-            } else {
-                // copy precommit git hook to library git hooks
-                copy(__DIR__ . "/../Storage/Git/Hooks/pre-commit", "{$libraryPath}/.git/hooks/pre-commit");
-    
-                // give valid permission to hooks for the execution
-                exec("cd {$libraryPath} && chmod ug+x .git/hooks/* 2>&1 >/dev/null");
-            }
+            $shellOutput->writeln(sprintf('<error>%s</error>', @$output[0]));
+            return self::FAILURE;
         }
 
-        if($exitCode == self::SUCCESS) {
-            $shellOutput->writeln("<bg=green>Library created successfully.</>");
-        } else {
-            // delete library on failure (replace this with proper directory function)
-            exec("rm -rf {$libraryPath} 2>&1 >/dev/null");
+        // delete .git folder of template (replace this with proper directory function)
+        exec("rm -rf {$libraryPath}/.git 2>&1 >/dev/null");
 
-            $shellOutput->writeln("<bg=red>Failed to create library.</>");
+        $output = [];
+
+        /**
+         * initialize git folder
+         * install php cs fixer in quite mode
+         */
+        exec("cd {$libraryPath} && git init && composer require friendsofphp/php-cs-fixer -q 2>&1 >/dev/null", $output, $resultCode);
+
+        if ($resultCode > 0) {
+            $shellOutput->writeln(sprintf('<error>%s</error>', @$output[0]));
+            return self::FAILURE;
         }
 
-        return $exitCode;
-    }
+        // copy precommit git hook to library git hooks
+        copy(__DIR__ . "/../Storage/Git/Hooks/pre-commit", "{$libraryPath}/.git/hooks/pre-commit");
 
-    /**
-     * check if library already exists and directory is valid
-     *
-     * @param  string $dir
-     * @return void
-     */
-    public function validateLibrary($library): void
-    {
-        if (!$library) {
-            throw new InvalidArgumentException('Invalid directory provided.');
-        } elseif (is_dir($this->currentWorkingDirectory . '/' . $library)) {
-            throw new Exception('Library already exists.');
-        }
+        // give valid permission to hooks for the execution rwx for user and groups and rx for public
+        chmod("{$libraryPath}/.git/hooks/pre-commit", 0775);
+
+        $shellOutput->writeln("<bg=green>Library created successfully.</>");
+
+        return self::SUCCESS;
     }
 }
