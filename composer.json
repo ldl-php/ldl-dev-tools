@@ -1,11 +1,13 @@
 {
     "require": {
         "symfony/console": "^5.3",
-        "ext-readline": "*"
+        "ext-readline": "*",
+        "ldl-framework/file-common": "dev-master"
     },
     "autoload": {
         "psr-4": {
             "": "src"
         }
-    }
+    },
+    "minimum-stability": "dev"
 }

@@ -12,28 +12,21 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class LDLSubProjectCommand extends Command
+class LDLProjectInitializeCommand extends Command
 {    
-    /**
-     * current working directory path
-     * 
-     * @var string|null
-     */
-    protected $currentWorkingDirector;
-    
     /**
      * the default command name
      * 
      * @var string|null
      */
-    protected static $defaultName = 'create:project';
+    protected static $defaultName = 'project:init';
 
     /**
      * The default command description
      * 
      * @var string|null
      */
-    protected static $defaultDescription = 'Pulls in the ldl-project-template repo to create a new library.';
+    protected static $defaultDescription = 'Initialize the cloned LDL library.';
 
     /**
      * command configuration
@@ -42,18 +35,12 @@ class LDLSubProjectCommand extends Command
      */
     protected function configure(): void
     {
-        $this->currentWorkingDirectory = getcwd();
-
-        if (!$this->currentWorkingDirectory) {
-            throw new Exception("Invalid directory. Please check the permissions.");
-        }
-
-        $this->setDefinition(
+       $this->setDefinition(
             new InputDefinition([
                 new InputArgument(
-                    'library',
+                    'library-dir',
                     InputArgument::REQUIRED,
-                    'Library name with ldl prefix.'
+                    'Library directory to initialize.'
                 )
             ])
         );
@@ -68,33 +55,32 @@ class LDLSubProjectCommand extends Command
      */
     protected function execute(InputInterface $shellInput, OutputInterface $shellOutput): int
     {
-        $library = $shellInput->getArgument('library');
+        $LibraryDir = $shellInput->getArgument('library-dir');
 
-        if('' === trim($library)){
-            throw new Exception('Invalid destination directory provided');
-        }
-
-        $libraryPath = $this->currentWorkingDirectory . DIRECTORY_SEPARATOR . $library;
-
-        if(is_dir($libraryPath)){
-            $shellOutput->writeln("<error>Destination directory {$library} already exists!");
+        if('' === trim($LibraryDir)){
+            $shellOutput->writeln("<error>Invalid library directory provided!");
             return self::FAILURE;
         }
 
-        if(!is_writable($this->currentWorkingDirectory)){
+        if(!is_dir($LibraryDir)){
+            $shellOutput->writeln("<error>Destination directory {$LibraryDir} doesn't exists!");
+            return self::FAILURE;
+        }
+
+        if(!is_writable($LibraryDir)){
             $shellOutput->writeln("<error>Current working directory is not writable</error>");
             return self::FAILURE;
         }
 
         try {
-            $project =  new Project($libraryPath);
-            $project->create();
+            $project =  new Project($LibraryDir);
+            $project->initialize();
         } catch (Exception $e) {
             $shellOutput->writeln(sprintf('<error>%s: %s</error>', get_class($e), $e->getMessage()));
             return self::FAILURE;
         }
 
-        $shellOutput->writeln("<bg=green>Library created successfully.</>");
+        $shellOutput->writeln("<bg=green>Initialized successfully.</>");
 
         return self::SUCCESS;
     }
