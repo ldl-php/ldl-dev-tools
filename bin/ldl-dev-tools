@@ -4,6 +4,7 @@
 require __DIR__.'/../vendor/autoload.php';
 
 use Symfony\Component\Console\Application;
+use LDL\DevTools\Command\LDLSubProjectCommand;
 use LDL\DevTools\Command\RunExampleFileCommand;
 use LDL\DevTools\Command\RunExampleDirectoryCommand;
 
@@ -11,5 +12,6 @@ $application = new Application();
 
 $application->add(new RunExampleDirectoryCommand());
 $application->add(new RunExampleFileCommand());
+$application->add(new LDLSubProjectCommand());
 
 $application->run();
