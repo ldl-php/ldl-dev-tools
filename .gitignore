@@ -1,2 +1,7 @@
 .idea/
 vendor
+docker/.docker-compose-installer
+docker/log/docker-build.log
+docker/github/token
+docker/projects
+.env

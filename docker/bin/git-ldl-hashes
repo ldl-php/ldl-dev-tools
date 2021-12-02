@@ -1,0 +1,18 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+cd ${REPO_LOCATION}
+
+for x in $(ls -d ./*); do
+   cd $x
+   if [[ -z "$1" ]]; then
+      export COMMIT=$(git rev-parse HEAD)
+      stdout_work "hash: $COMMIT   Project: $x"
+   else
+      export COMMIT=$(git log --pretty=short -n 1)
+      stdout_work "Project: $x\n"
+      echo -e "${COMMIT}\n\n"
+   fi	   
+   cd ..
+done

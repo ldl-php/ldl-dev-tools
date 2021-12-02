@@ -1,0 +1,29 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+export GITHUB_TOKEN_FILE="/etc/github-token"
+
+if [ -f ${GITHUB_TOKEN_FILE} ]; then
+	echo -e "\n"
+	stdout_error "##########################################################";
+	stdout_error "You haven't configured your github token!"
+        stdout_error "Please read docs/GITHUB.md to learn how to create one!\n"
+	stdout_error "##########################################################";
+	echo -e "\n"
+	exit 1;
+fi
+
+which gh &>/dev/null
+if [[ $? -gt 0 ]] ; then
+    work "Installing GitHub CLI tools ..."
+    installGhCli
+fi
+
+stdout_work "Attempting to login into Github ..."
+
+gh auth login --with-token < /etc/github/token
+
+[ $? -gt 0 ] && stdout_error "Could not login into Github! *** Verify that your token has the correct permissions AND that it has not expired! ***" && exit 1
+
+stdout_ok "Logged into github success!"
