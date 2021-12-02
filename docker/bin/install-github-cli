@@ -1,0 +1,12 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+stdout_work "Installing GitHUB CLI tools ..."
+export CWD=$(pwd)
+cd /tmp
+wget https://github.com/cli/cli/releases/download/v2.2.0/gh_2.2.0_linux_amd64.deb &> /dev/null
+[ $? -gt 0 ] && stdout_error "Could not fetch GitHub CLI tools package, check your internet connection!" && exit 1;
+dpkg -i gh_2.2.0_linux_amd64.deb
+[ $? -gt 0 ] && stdout_error "Could not install  GitHub CLI tools Debian package!" && exit 1;
+cd $CWD

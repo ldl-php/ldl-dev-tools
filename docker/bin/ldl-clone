@@ -1,0 +1,66 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+export LDL_USER=$(id -nu ${EDIT_USER})
+
+#Check if composer is installed
+which composer &>/dev/null
+
+if [[ $? -gt 0 ]] ; then
+   run_as_root /bin/install-php-composer
+else
+   stdout_ok "Found PHP Composer!"
+fi
+
+#Check if GitHub CLI tool is installed
+which gh &>/dev/null
+if [[ $? -gt 0 ]] ; then
+   run_as_root /bin/install-github-cli
+else
+   stdout_ok "Found Github CLI tool!"
+fi
+
+#Login into github
+github-login
+
+[ -d ${REPO_LOCATION} ] && run_as_root chown -R ${EDIT_USER}:${EDIT_GROUP} ${REPO_LOCATION} && run_as_root rm -rf ${REPO_LOCATION}/*
+
+mkdir -p ${REPO_LOCATION} &>/dev/null
+
+cd ${REPO_LOCATION}
+
+stdout_work "Forking and cloning LDL repositories in ${REPO_LOCATION} ..."
+
+for x in $(gh repo list ${GITHUB_USER} -L 1000 | grep ${GITHUB_REPO_PATTERN} | cut -f 1); do
+   export REPO_NAME=$(echo $x | cut -d '/' -f 2)
+
+   stdout_work "[${REPO_NAME}] Forking and cloning ..."
+
+   gh repo fork $x --clone &> /dev/null
+
+   if [[ $? -gt 0 ]]; then
+      stdout_error "[${REPO_NAME}] Error cloning and forking!"
+      continue
+   fi
+
+   cd ${REPO_NAME}
+
+   git config pull.rebase true
+
+   stdout_work "[${REPO_NAME}] Installing composer dependencies ..."
+
+   composer install &> /tmp/${REPO_NAME}_composer.log
+
+   if [[ $? -gt 0 ]]; then
+      stdout_warning "[${REPO_NAME}] Error installing composer dependencies!"
+   fi
+
+   cd ..
+done
+
+stdout_work "Setting file permissions ..."
+
+chown -R ${EDIT_USER}:${EDIT_GROUP} ${REPO_LOCATION}
+
+stdout_ok "All repositories have been cloned!"
