@@ -21,7 +21,6 @@ services:
       - ./docker/etc/motd:/etc/motd
       - ./docker/projects:/home/ldl/projects
       - ./docker/github:/etc/github
-      - ./docker/etc/sudoers:/etc/sudoers
       - ./docker/bin/git-ldl-hashes:/bin/git-ldl-hashes
       - ./bin:/ldl
     environment:
