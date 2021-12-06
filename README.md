@@ -111,7 +111,7 @@ nano  "~/${RC_FILE}"
 Add at the bottom of this file the following line:
 
 ```text
-export ldl-start="sudo ~/ldl-dev-tools/bin/ldl-start $@"
+export ldl-start="sudo ~/ldl-dev-tools/bin/ldl-start"
 ```
 
 Then run:
