@@ -1,0 +1,29 @@
+version: '2.1'
+
+services:
+
+  ldl-dev:
+    container_name: "ldl-dev"
+    image: ldl/dev-tools
+    build:
+       context: ./docker
+       args:
+          EDIT_USER: ${EDIT_USER}
+          EDIT_GROUP: ${EDIT_GROUP}
+    volumes:
+      - ./docker/usr/share/ldl_bash_utils:/usr/share/ldl_bash_utils
+      - ./docker/etc/bashrc:/home/ldl/.bashrc
+      - ./docker/bin/start-container:/bin/start-container
+      - ./docker/bin/github-login:/bin/github-login
+      - ./docker/bin/ldl-clone:/bin/ldl-clone
+      - ./docker/bin/install-php-composer:/bin/install-php-composer
+      - ./docker/bin/install-github-cli:/bin/install-github-cli
+      - ./docker/etc/motd:/etc/motd
+      - ./docker/projects:/home/ldl/projects
+      - ./docker/github:/etc/github
+      - ./docker/etc/sudoers:/etc/sudoers
+      - ./docker/bin/git-ldl-hashes:/bin/git-ldl-hashes
+      - ./bin:/ldl
+    environment:
+       - EDIT_USER=${EDIT_USER}
+       - EDIT_GROUP=${EDIT_GROUP}

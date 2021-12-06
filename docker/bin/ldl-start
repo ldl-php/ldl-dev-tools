@@ -1,0 +1,34 @@
+#!/bin/bash
+
+export CONTAINER_NAME="ldl-dev"
+export SCRIPT_DIR="$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)";
+export DOCKER_DIR="${SCRIPT_DIR}/.."
+export LOCK_FILE="./docker/.docker-compose-installer"
+
+cat ${DOCKER_DIR}/etc/motd
+
+source ${DOCKER_DIR}/usr/share/ldl_bash_utils
+
+[[ ! -f ${LOCK_FILE} || ! -z "${1}" ]] && stdout_warning "I'm about to reinstall your LDL setup" && ./docker/install.sh
+
+cd ${SCRIPT_DIR}/../../
+
+[ $UID -ne 0 ] && stdout_error '*** You must be root to run this command! Please run it again as root or through sudo ***' && exit 1;
+
+stdout_work "Initializing LDL dev environment ...\n"
+
+if [[ -z $(docker ps -q -f "name=${DOCKER_CONTAINER_NAME}") ]]; then
+   docker-compose up &>/dev/null &
+fi
+
+while [[ -z "$(sudo docker ps | grep ${CONTAINER_NAME})" ]]; do
+	sleep 1
+done
+
+export CONTAINER_ID=$(docker ps --filter "name=${CONTAINER_NAME}" --format "{{.ID}}")
+
+docker exec -w ${REPO_LOCATION} --user ldl -it "${CONTAINER_ID}" /bin/bash
+
+echo -e "\n";
+stdout_work "Stopping LDL dev environment ..."
+docker-compose stop &> /dev/null

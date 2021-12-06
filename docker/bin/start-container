@@ -1,0 +1,21 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+export SETUP_LOCK="/tmp/setup.lock"
+
+function loopForever(){
+	while true; do sleep 3600; done
+}
+
+[[ ! -z "$1" ]] && rm -f ${SETUP_LOCK}
+
+[[ -f ${SETUP_LOCK} ]] && loopForever && exit 0;
+
+/bin/install-github-cli
+/bin/install-php-composer
+run_as_ldl /bin/ldl-clone
+
+touch ${SETUP_LOCK}
+
+stdout_ok "Setup finished successfully!"
