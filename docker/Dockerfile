@@ -5,9 +5,9 @@ ARG EDIT_GROUP
 
 RUN addgroup --gid ${EDIT_GROUP} --system ldl
 RUN adduser --gid ${EDIT_GROUP} --shell /bin/bash --uid ${EDIT_USER} --system ldl
-RUN usermod -a -G sudo ldl
 
 RUN apt-get update -y && apt-get install -y libpng-dev \
+sudo \
 libssl-dev \
 libcurl4-openssl-dev \
 pkg-config \
@@ -32,9 +32,11 @@ psutils \
 libonig-dev \
 g++ \
 wget \
-sudo \
 nano \
 vim;
+
+RUN usermod -a -G sudo ldl
+COPY ./etc/sudoers /etc/sudoers
 
 RUN docker-php-ext-install intl &&  \
     docker-php-ext-install pdo_mysql && \
@@ -46,6 +48,5 @@ RUN docker-php-ext-install intl &&  \
     docker-php-ext-install sockets && \
     docker-php-ext-install pcntl && \
     docker-php-ext-install mysqli
-
 
 CMD /bin/start-container
