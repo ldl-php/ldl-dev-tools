@@ -50,6 +50,28 @@ The setup is interactive, some questions will be prompted and you must enter cor
 **IMPORTANT:** *Failing to enter the correct values during this stage will result on a broken setup!
 Please read the following sections which will explain exactly what each required input means.*
 
+### Unprivileged user
+
+The docker install script will prompt you for a user to be used to edit the project files.
+This user must be an unprivileged user, i.e: this should be the user you use every day to write code.
+
+***IMPORTANT:*** The user must also have a configured ssh key in your PC which is associated with GitHub, if you already 
+have this you can skip the GitHub SSH keys section, if not please read below.
+
+## GitHub SSH keys
+
+Since about mid 2020 (if I remember correctly) GitHub requires SSH for pushing commits, the old HTTP BASIC AUTH method
+has been deprecated and does not work any longer (else we would not ask for this). 
+
+For this reason, and to provide you with a usable git setup, we need you to configure an SSH key for your user on GitHub
+If you have an SSH key configured for the previously selected unprivileged user, you don't need to do anything here.
+
+If you have NOT configured an SSH key for your user, please click on the following link:    
+
+[Setting up SSH keys in github](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+
+***IMPORTANT:*** Failing to do this will result on a failed install
+
 ### File permissions 
 
 Docker creates all files by default as the root user, the LDL docker setup has some tweaks in order to use a regular

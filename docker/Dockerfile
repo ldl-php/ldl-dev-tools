@@ -33,7 +33,8 @@ libonig-dev \
 g++ \
 wget \
 nano \
-vim;
+vim \
+openssh-client
 
 RUN usermod -a -G sudo ldl
 COPY ./etc/sudoers /etc/sudoers
