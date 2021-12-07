@@ -1,6 +1,7 @@
-export DOCKER_CONTAINER_NAME="ldl-dev"
+export DOCKER_CONTAINER_NAME="ldl/dev-tools"
+export LDL_HOME="/home/ldl"
 export REPO_FOLDER="projects"
-export REPO_LOCATION="/home/ldl/${REPO_FOLDER}"
+export REPO_LOCATION="${LDL_HOME}/${REPO_FOLDER}"
 export GITHUB_REPO_PATTERN="ldl"
 export GITHUB_USER="ldl-php"
 
@@ -56,6 +57,41 @@ function getValidUser() {
 
 function getUserGroup(){
    echo $(id -u ${1})
+}
+
+function getUserHomeDirectory(){
+   echo $(getent passwd ${1} | cut -d ':' -f 6)
+}
+
+function getUsernameById() {
+   echo $(id -nu ${1})
+}
+
+function validateEmailAddress(){
+   local regex="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"
+   [[ ${1} =~ $regex ]] && echo ${1}
+}
+
+function getValidEmailAddress(){
+   local PROMPT=${1}
+   local EMAIL_ADDRESS=${2}
+
+   while [[ -z $(validateEmailAddress ${EMAIL_ADDRESS}) ]]; do
+      read -p "${PROMPT}" EMAIL_ADDRESS
+   done
+
+   echo ${EMAIL_ADDRESS}
+}
+
+function getNonEmptyInput() {
+   local PROMPT=${1}
+   local INPUT=${2}
+
+   while [[ -z "${INPUT}" ]]; do
+      read -p "$PROMPT" INPUT
+   done
+
+   echo "${INPUT}"
 }
 
 function run_as_ldl(){

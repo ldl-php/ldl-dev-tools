@@ -19,11 +19,17 @@ export LOCK_FILE=".docker-compose-installer"
 export GITHUB_TOKEN_FILE="${SCRIPT_DIR}/github/token"
 export EDIT_USER=0
 export EDIT_GROUP=0
+export EDIT_USER_HOME=''
+export GIT_AUTHOR_NAME=''
+export GIT_AUTHOR_EMAIL=''
 
-if [[ -f ${LOCK_FILE} ]]
-then
-    stdout_warning "Seems like a previous install took place, do you wish to continue? (y/n)"
+if [[ -f ${LOCK_FILE} ]]; then
+    stdout_warning "A previous install took place, *EVERYTHING WILL BE LOST* if you proceed"
+    stdout_warning "If you have changes in any repo, upload them to git before you continue"
+    stdout_warning "Do you wish to continue? (y/n)"
+
     read opt
+
     [[ "$opt" != "y" ]] && echo "Ok, bailing out!" && exit 1
 fi
 
@@ -67,28 +73,28 @@ if [[ ! -f "${GITHUB_TOKEN_FILE}" ]]; then
    echo "${GITHUB_TOKEN}" > ${GITHUB_TOKEN_FILE}
 fi
 
-if [[ ! -f ${ENV_FILE} ]]; then
-   stdout_warning "I need to know which is the user you are going to use to edit files"
-   stdout_warning "This is so you can edit files from within your machine"
-   export EDIT_USER=$(getValidUser)
-   export EDIT_GROUP=$(getUserGroup ${EDIT_USER})
+stdout_warning "I need to know which is the user you are going to use to edit files"
+stdout_warning "This is so you can edit files from within your machine"
+export EDIT_USER=$(getValidUser)
+export EDIT_GROUP=$(getUserGroup ${EDIT_USER})
+export EDIT_USER_HOME=$(getUserHomeDirectory $(getUsernameById ${EDIT_USER}))
+export GIT_AUTHOR_EMAIL=$(getValidEmailAddress "Please enter your GitHub email:")
+export GIT_AUTHOR_NAME=$(getNonEmptyInput "Please enter your GitHub author name, (this should be your name):")
 
-   echo "EDIT_USER=${EDIT_USER}" > ${ENV_FILE}
-   echo "EDIT_GROUP=${EDIT_GROUP}" >> ${ENV_FILE}
-else
-   source ${ENV_FILE}
-fi
+echo "EDIT_USER=${EDIT_USER}" > ${ENV_FILE}
+echo "EDIT_GROUP=${EDIT_GROUP}" >> ${ENV_FILE}
+echo "EDIT_USER_HOME=${EDIT_USER_HOME}" >> ${ENV_FILE}
+echo "GIT_AUTHOR_NAME=${GIT_AUTHOR_NAME}" >> ${ENV_FILE}
+echo "GIT_AUTHOR_EMAIL=${GIT_AUTHOR_EMAIL}" >> ${ENV_FILE}
+
+[[ ! -f "${EDIT_USER_HOME}/.ssh/id_rsa.pub" ]] && \
+   stdout_error "SSH identity file \"${EDIT_USER}/.ssh/id_rsa.pub\" was not found!" && \
+   stdout_error "Read README.md to know how to generate an SSH key" && \
+   exit 1;
 
 if [[ -z $(docker ps -q -f "name=${DOCKER_CONTAINER_NAME}") ]]; then
-   docker-compose stop &> /dev/null&
-   spinner "Stopping docker container ..."
-   echo ""
-fi
-
-docker container inspect ${DOCKER_CONTAINER_NAME} &> /dev/null
-if [[ $? -eq 0 ]]; then 
-   docker rm ldl-dev &> /dev/null&
-   spinner "Removing docker container ..."
+   docker-compose down &> /dev/null&
+   spinner "Stopping and removing docker container ..."
    echo ""
 fi
 

@@ -10,7 +10,7 @@ cat ${DOCKER_DIR}/etc/motd
 
 source ${DOCKER_DIR}/usr/share/ldl_bash_utils
 
-[[ ! -f ${LOCK_FILE} || ! -z "${1}" ]] && stdout_warning "I'm about to reinstall your LDL setup" && ${INSTALLER_CMD}
+[[ ! -f ${LOCK_FILE} || ! -z "${1}" ]] && ${INSTALLER_CMD}
 
 cd ${SCRIPT_DIR}/../../
 

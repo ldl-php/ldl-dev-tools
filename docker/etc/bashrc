@@ -49,12 +49,15 @@ function parse_git_dirty {
 
 function prompt(){
  export BRANCH=$(parse_git_branch)
- [[ -z ${BRANCH} ]] && echo "\[\e[35m\]LDL\[\e[m\]:\w>" && return
- echo "\[\e[35m\]LDL\[\e[m\]:\w \[\e[31m\]${BRANCH}\[\e[m\]>" && return
+ if [[ -z ${BRANCH} ]]; then 
+    export PS1="\[\e[35m\]LDL\[\e[m\]:\w>"
+ else
+    export PS1="\[\e[35m\]LDL\[\e[m\]:\w \[\e[31m\]branch:${BRANCH}\[\e[m\]>"
+ fi
 }
 
 alias ls="ls --color=always"
 
 export PATH="${REPO_LOCATION}/ldl-dev-tools/bin:/ldl:$PATH"
 
-export PS1=$(prompt)
+export PROMPT_COMMAND="prompt"

@@ -4,7 +4,7 @@ services:
 
   ldl-dev:
     container_name: "ldl-dev"
-    image: ldl/dev-tools
+    image: ldl-dev
     build:
        context: ./docker
        args:
@@ -23,6 +23,10 @@ services:
       - ./docker/github:/etc/github
       - ./docker/bin/git-ldl-hashes:/bin/git-ldl-hashes
       - ./bin:/ldl
+      - ${EDIT_USER_HOME}/.ssh:/home/ldl/.ssh
     environment:
        - EDIT_USER=${EDIT_USER}
        - EDIT_GROUP=${EDIT_GROUP}
+       - EDIT_USER_HOME=${EDIT_USER_HOME}
+       - GIT_AUTHOR_NAME=${GIT_AUTHOR_NAME}
+       - GIT_AUTHOR_EMAIL=${GIT_AUTHOR_EMAIL}

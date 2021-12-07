@@ -24,23 +24,33 @@ fi
 #Login into github
 github-login
 
-[ -d ${REPO_LOCATION} ] && run_as_root chown -R ${EDIT_USER}:${EDIT_GROUP} ${REPO_LOCATION} && run_as_root rm -rf ${REPO_LOCATION}/*
+[ -d ${REPO_LOCATION} ] && run_as_root rm -rf ${REPO_LOCATION}/*
 
 mkdir -p ${REPO_LOCATION} &>/dev/null
 
 cd ${REPO_LOCATION}
 
-stdout_work "Forking and cloning LDL repositories in ${REPO_LOCATION} ..."
+[[ ! -d "${LDL_HOME}/.ssh" ]] && stdout_error "No .ssh keys were found!" && exit 1
+
+stdout_work "[GitHub] Setting author name to ${GIT_AUTHOR_NAME} ..."
+git config --global user.name ${GIT_AUTHOR_NAME}
+
+stdout_work "[GitHub] Setting author email ${GIT_AUTHOR_EMAIL}  ..."
+git config --global user.email ${GIT_AUTHOR_EMAIL}
+
+gh config set git_protocol ssh
+
+stdout_work "[GitHub] Forking and cloning LDL repositories in ${REPO_LOCATION} ..."
 
 for x in $(gh repo list ${GITHUB_USER} -L 1000 | grep ${GITHUB_REPO_PATTERN} | cut -f 1); do
    export REPO_NAME=$(echo $x | cut -d '/' -f 2)
 
-   stdout_work "[${REPO_NAME}] Forking and cloning ..."
+   stdout_work "[GitHub][${REPO_NAME}] Forking and cloning ..."
 
-   gh repo fork $x --clone &> /dev/null
+   gh repo fork git@github.com:$x.git --clone &> /dev/null
 
    if [[ $? -gt 0 ]]; then
-      stdout_error "[${REPO_NAME}] Error cloning and forking!"
+      stdout_error "[GitHub][${REPO_NAME}] Error cloning and forking!"
       continue
    fi
 
@@ -48,12 +58,12 @@ for x in $(gh repo list ${GITHUB_USER} -L 1000 | grep ${GITHUB_REPO_PATTERN} | c
 
    git config pull.rebase true
 
-   stdout_work "[${REPO_NAME}] Installing composer dependencies ..."
+   stdout_work "[Composer][${REPO_NAME}] Installing composer dependencies ..."
 
    composer install &> /tmp/${REPO_NAME}_composer.log
 
    if [[ $? -gt 0 ]]; then
-      stdout_warning "[${REPO_NAME}] Error installing composer dependencies!"
+      stdout_warning "[Composer][${REPO_NAME}] Error installing composer dependencies!"
    fi
 
    cd ..
