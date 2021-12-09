@@ -1,0 +1,26 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+export PROJECT_DIRECTORY=${1}
+
+[[ -z "${PROJECT_DIRECTORY}" ]] && export PROJECT_DIRECTORY=$(basename $(pwd))
+
+export PROJECT_DIRECTORY="${REPO_LOCATION}/${PROJECT_DIRECTORY}"
+
+ls ${PROJECT_DIRECTORY} &> /dev/null
+[[ $? -gt 0 ]] && stdout_work "Could not find project ${PROJECT_DIRECTORY}" && exit 1
+
+cd ${PROJECT_DIRECTORY}
+
+[[ ! -d "./example" ]] && stdout_error "Failed to find examples directory" && exit 1
+
+export EXAMPLE_DIRECTORIES_FILE="${PROJECT_DIRECTORY}/.ldl-example-directories"
+
+[[ ! -f "${EXAMPLE_DIRECTORIES_FILE}" ]] && \
+stdout_error "Could not find ${EXAMPLE_DIRECTORIES_FILE}!" && \
+exit 1;
+
+for x in $(cat ${EXAMPLE_DIRECTORIES_FILE}); do
+    env ldl-dev-tools run:example:dir ${PROJECT_DIRECTORY}/${x}
+done

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+export CURRENT_BRANCH=$(git branch|grep '*'| sed s/'\* '//g)
+
+stdout_work "[LDL Sync] Stashing changes ..."
+git stash
+
+stdout_work "[LDL Sync] Syncing $x ..."
+stdout_work "[LDL Sync] Getting master branch name ..."
+export MASTER_BRANCH=$(env git-get-master)
+env git-upstream-update "${MASTER_BRANCH}"
+
+stdout_work "[LDL Sync] Checking out ${CURRENT_BRANCH} ..."
+git checkout ${CURRENT_BRANCH}
+
+stdout_work "[LDL Sync] Applying stashed changes ..."
+git stash apply
+[[ $? -gt 0 ]] && stdout_error "Your local changes seem to conflict with changes from upstream, please resolve them" && exit 1
+
+[[ ! -z "${1}" ]] && stdout_work "[LDL Sync] Rebasing against ${MASTER_BRANCH}" && git rebase -i ${MASTER_BRANCH}

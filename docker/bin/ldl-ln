@@ -1,0 +1,34 @@
+#!/bin/bash
+
+#Creates a ldl-vendor folder and symlinks all repositories
+
+source /usr/share/ldl_bash_utils
+
+[[ ${UID} -eq 0 ]] && echo "This command must not be run as root!" && exit 1
+
+export SYMLINK_VENDOR_DIR="/home/ldl/ldl-vendor/ldl-framework"
+rm -rf ${SYMLINK_VENDOR_DIR}
+mkdir -p ${SYMLINK_VENDOR_DIR}
+
+for x in $(ls -d ${REPO_LOCATION}/*); do
+    export PROJECT_NAME=$(basename $x)
+    export COMPOSER_FILE="${x}/composer.json"
+    [[ ! -f ${COMPOSER_FILE} ]] && stdout_error "Failed to find composer.json" && continue
+    export COMPOSER_PROJECT_NAME=$(cat ${COMPOSER_FILE} | jq .name | sed s/'"'//g | xargs basename)
+    export DESTINATION="${SYMLINK_VENDOR_DIR}/${COMPOSER_PROJECT_NAME}"
+    [[ ! -d "${x}/vendor/ldl-framework" ]] && continue
+
+    stdout_work "Symlinking ${x} to ${DESTINATION}"
+    ln -s ${x} ${DESTINATION}
+    rm -rf ${x}/vendor/ldl-framework
+    ln -s ${SYMLINK_VENDOR_DIR} ${x}/vendor/ldl-framework
+done
+
+stdout_work "Recreating composer autoloaders ..."
+
+for x in $(ls -d ${REPO_LOCATION}/*); do
+    cd $x
+    composer dump-autoload &>/dev/null
+done
+
+stdout_work "All Done!"

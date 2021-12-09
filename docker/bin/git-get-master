@@ -1,0 +1,5 @@
+#!/bin/bash
+
+git remote show origin | grep HEAD | cut -d : -f 2 | sed -e s/'\s'//g
+[[ $? -gt 0 ]] && exit 1
+

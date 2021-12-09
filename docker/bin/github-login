@@ -24,6 +24,8 @@ stdout_work "Attempting to login into Github ..."
 
 gh auth login --with-token < /etc/github/token
 
-[ $? -gt 0 ] && stdout_error "Could not login into Github! *** Verify that your token has the correct permissions AND that it has not expired! ***" && exit 1
-
+[[ $? -gt 0 ]] && stdout_error "Could not login into Github! *** Verify that your token has the correct permissions AND that it has not expired! ***" && exit 1
 stdout_ok "Logged into github success!"
+
+stdout_work "[GitHub] Setting default protocol to SSH ..."
+gh config set git_protocol ssh

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+export PROJECT_DIRECTORY=${1}
+
+[[ -z "${PROJECT_DIRECTORY}" ]] && export PROJECT_DIRECTORY=$(basename $(pwd))
+
+export PROJECT_DIRECTORY="${REPO_LOCATION}/${PROJECT_DIRECTORY}"
+
+ls ${PROJECT_DIRECTORY} &> /dev/null
+[[ $? -gt 0 ]] && stdout_work "Could not find project ${PROJECT_DIRECTORY}" && exit 1
+
+cd ${PROJECT_DIRECTORY}
+
+[[ ! -f "./composer.json" ]] && stdout_error "Failed to find composer.json" && exit 1
+
+export COMPOSER_PROJECT_NAME=$(cat ./composer.json | jq .name | sed s/'"'//g)
+
+for x in $(ls -d ${REPO_LOCATION}/*); do
+    [[ "${x}" == "${PROJECT_DIRECTORY}" ]] && continue
+    cd ${x}
+    [[ -d "./vendor/${COMPOSER_PROJECT_NAME}"  ]] && echo ${x}
+done

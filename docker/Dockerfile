@@ -50,4 +50,8 @@ RUN docker-php-ext-install intl &&  \
     docker-php-ext-install pcntl && \
     docker-php-ext-install mysqli
 
-CMD /bin/start-container
+RUN wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -O /bin/jq
+
+RUN chmod 755 /bin/jq
+
+CMD /docker/bin/start-container

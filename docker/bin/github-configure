@@ -1,0 +1,18 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+[[ -z ${GIT_AUTHOR_NAME} ]] && stdout_error "Git author name is empty!" && exit 1
+[[ -z ${GIT_AUTHOR_EMAIL} ]] && stdout_error "Git author email is empty!" && exit 1
+
+stdout_work "[GIT] Setting author name to ${GIT_AUTHOR_NAME} ..."
+git config --global user.name ${GIT_AUTHOR_NAME}
+
+stdout_work "[GIT] Setting author email ${GIT_AUTHOR_EMAIL}  ..."
+git config --global user.email ${GIT_AUTHOR_EMAIL}
+
+stdout_work "[GIT] Setting default checkout remote to origin ..."
+git config --global --add checkout.defaultRemote origin
+
+stdout_work "[GIT] Setting pull rebase to true ..."
+git config --global pull.rebase true
