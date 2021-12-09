@@ -1,0 +1,26 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+function usage(){
+    local SCRIPT_NAME=$(basename $0)
+    echo "Usage: ${SCRIPT_NAME} <PR NUMBER> <BRANCH NAME>"
+}
+
+[[ ! -d .git ]] && stdout_error "Not a git directory" && exit 1
+[[ -z "${1}" || -z "${2}" ]] && usage && exit 1
+
+git checkout $(git-get-master)
+
+stdout_work "Fetching pull request ${1} ..."
+git fetch upstream pull/${1}/head &> /dev/null
+[[ $? -gt 0 ]] && stdout_error "Failed to fetch pull request: ${1}!" && exit 1
+
+git branch -D ${2} &> /dev/null
+
+stdout_work "Creating new branch ${2} ..."
+git checkout -b ${2} FETCH_HEAD
+
+export COMMIT_COUNT=$(git rev-list --count HEAD ^master)
+
+[[ ${COMMIT_COUNT} -gt 1 ]] && stdout_warning "This pull request contains ${COMMIT_COUNT} commits!" && exit 1

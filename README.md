@@ -183,7 +183,8 @@ Use it when you need to pull in changes from master
 
 DETAILS: Stashes changes if any, resets current branch to HEAD, checks out master, pulls master, checks out previous branch, applies stashed changes
 
-
 ## TODO
 
+- Add documentation about our custom commands
 - Add documentation about our git branching model 
+

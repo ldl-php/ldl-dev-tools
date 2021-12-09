@@ -1,0 +1,29 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+export BRANCH='';
+
+if [[ -z "${1}" ]]; then
+    export BRANCH=$(git-get-master)
+else
+    export BRANCH=${1}
+fi
+
+stdout_work "[GIT Sync] Syncing branch ${BRANCH} ..."
+
+stdout_ok "[GIT Sync] Branch: ${BRANCH}"
+stdout_work "[GIT Sync] Checking out ${BRANCH}"
+
+git checkout ${BRANCH}
+
+[[ $? -gt 0 ]] && stdout_work "[Git Sync] No such branch ${BRANCH}" && exit 1
+
+stdout_ok "[GIT Sync] Fetching changes from upstream ..." && \
+git fetch upstream && \
+stdout_ok "[GIT Sync] Pulling changes from upstream" && \
+git pull upstream ${BRANCH} && \
+stdout_ok "[GIT Sync] Pushing changes ..." && \
+git push origin ${BRANCH}
+
+stdout_ok "Your repo is synced with the upstream!"

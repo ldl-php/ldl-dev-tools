@@ -84,11 +84,11 @@ export GIT_AUTHOR_NAME=$(getNonEmptyInput "Please enter your GitHub author name,
 echo "EDIT_USER=${EDIT_USER}" > ${ENV_FILE}
 echo "EDIT_GROUP=${EDIT_GROUP}" >> ${ENV_FILE}
 echo "EDIT_USER_HOME=${EDIT_USER_HOME}" >> ${ENV_FILE}
-echo "GIT_AUTHOR_NAME=${GIT_AUTHOR_NAME}" >> ${ENV_FILE}
+echo "GIT_AUTHOR_NAME=\"${GIT_AUTHOR_NAME}\"" >> ${ENV_FILE}
 echo "GIT_AUTHOR_EMAIL=${GIT_AUTHOR_EMAIL}" >> ${ENV_FILE}
 
 [[ ! -f "${EDIT_USER_HOME}/.ssh/id_rsa.pub" ]] && \
-   stdout_error "SSH identity file \"${EDIT_USER}/.ssh/id_rsa.pub\" was not found!" && \
+   stdout_error "SSH identity file \"${EDIT_USER_HOME}/.ssh/id_rsa.pub\" was not found!" && \
    stdout_error "Read README.md to know how to generate an SSH key" && \
    exit 1;
 
@@ -110,6 +110,4 @@ echo ""
 stdout_ok "Creating lock file ..."
 touch ${LOCK_FILE}
 
-stdout_ok "Running docker-compose up ..."
-cd ..
-docker-compose up
+stdout_ok "Docker build completed!"

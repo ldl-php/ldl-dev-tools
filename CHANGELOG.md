@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 - feature/1201462004211735 - Create docker development environment
+- feature/1201492179143399 - Heavy improvements and features
 
 ### Changed
 

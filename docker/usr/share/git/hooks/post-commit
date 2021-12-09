@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+env ldl-sync

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+export SETUP_LOCK="/tmp/setup.lock"
+
+function loopForever(){
+	while true; do sleep 3600; done
+}
+
+[[ ! -z "$1" ]] && rm -f ${SETUP_LOCK}
+
+[[ -f ${SETUP_LOCK} ]] && exit 0;
+
+source /home/ldl/.bashrc
+
+env install-github-cli && \
+env install-php-composer && \
+run_as_ldl $(which ldl-clone)  && \
+cd /ldl-dev-tools && \
+env ccc  &>/dev/null && \
+touch ${SETUP_LOCK} && \
+stdout_ok "LDL environment setup successfully!" && \
+exit 0

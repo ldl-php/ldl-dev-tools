@@ -58,6 +58,6 @@ function prompt(){
 
 alias ls="ls --color=always"
 
-export PATH="${REPO_LOCATION}/ldl-dev-tools/bin:/ldl:$PATH"
+export PATH="/ldl-dev-tools/bin:/docker/bin:$PATH"
 
 export PROMPT_COMMAND="prompt"

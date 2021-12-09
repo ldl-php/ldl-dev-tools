@@ -1,0 +1,10 @@
+#!/bin/bash
+
+source /usr/share/ldl_bash_utils
+
+stdout_work "[LDL Sync] Syncing all LDL repositories ..."
+
+for x in $(ls -d ${REPO_LOCATION}/*); do
+   cd ${x}
+   ldl-sync
+done

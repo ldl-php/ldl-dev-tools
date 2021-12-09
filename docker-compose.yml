@@ -11,18 +11,17 @@ services:
           EDIT_USER: ${EDIT_USER}
           EDIT_GROUP: ${EDIT_GROUP}
     volumes:
+      - ./docker/etc/bashrc:/root/.bashrc
+      - ./docker/bin:/docker/bin
+      - ./.env:/etc/environment
+      - .:/ldl-dev-tools
       - ./docker/usr/share/ldl_bash_utils:/usr/share/ldl_bash_utils
+      - ./docker/usr/share/git:/usr/share/git
       - ./docker/etc/bashrc:/home/ldl/.bashrc
-      - ./docker/bin/start-container:/bin/start-container
-      - ./docker/bin/github-login:/bin/github-login
-      - ./docker/bin/ldl-clone:/bin/ldl-clone
-      - ./docker/bin/install-php-composer:/bin/install-php-composer
-      - ./docker/bin/install-github-cli:/bin/install-github-cli
       - ./docker/etc/motd:/etc/motd
-      - ./docker/projects:/home/ldl/projects
       - ./docker/github:/etc/github
-      - ./docker/bin/git-ldl-hashes:/bin/git-ldl-hashes
       - ./bin:/ldl
+      - ./docker/projects:/home/ldl/projects
       - ${EDIT_USER_HOME}/.ssh:/home/ldl/.ssh
     environment:
        - EDIT_USER=${EDIT_USER}
