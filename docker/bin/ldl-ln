@@ -6,22 +6,44 @@ source /usr/share/ldl_bash_utils
 
 [[ ${UID} -eq 0 ]] && echo "This command must not be run as root!" && exit 1
 
-export SYMLINK_VENDOR_DIR="/home/ldl/ldl-vendor/ldl-framework"
+export SYMLINK_VENDOR_DIR="/tmp/ldl-vendor"
 rm -rf ${SYMLINK_VENDOR_DIR}
-mkdir -p ${SYMLINK_VENDOR_DIR}
 
-for x in $(ls -d ${REPO_LOCATION}/*); do
-    export PROJECT_NAME=$(basename $x)
-    export COMPOSER_FILE="${x}/composer.json"
+mkdir ${SYMLINK_VENDOR_DIR}
+
+cd ${REPO_LOCATION}
+export PROJECTS=$(ls -1d *)
+
+#Link all projects to a common folder we do this to be able to resolve composer package names
+#To git directory names
+
+for PROJECT in ${PROJECTS}; do
+    cd ${REPO_LOCATION}/${PROJECT}
+    export COMPOSER_FILE="composer.json"
     [[ ! -f ${COMPOSER_FILE} ]] && stdout_error "Failed to find composer.json" && continue
     export COMPOSER_PROJECT_NAME=$(cat ${COMPOSER_FILE} | jq .name | sed s/'"'//g | xargs basename)
-    export DESTINATION="${SYMLINK_VENDOR_DIR}/${COMPOSER_PROJECT_NAME}"
-    [[ ! -d "${x}/vendor/ldl-framework" ]] && continue
+    stdout_work "Symlinking ${PROJECT} to ${COMPOSER_PROJECT_NAME} in shared vendor folder ..."
+    cd ..
+    ln -sf ${REPO_LOCATION}/${PROJECT} ${SYMLINK_VENDOR_DIR}/${COMPOSER_PROJECT_NAME}
+done
 
-    stdout_work "Symlinking ${x} to ${DESTINATION}"
-    ln -s ${x} ${DESTINATION}
-    rm -rf ${x}/vendor/ldl-framework
-    ln -s ${SYMLINK_VENDOR_DIR} ${x}/vendor/ldl-framework
+for PROJECT in ${PROJECTS}; do
+    cd ${REPO_LOCATION}
+
+    [[ ! -d "${PROJECT}/vendor/ldl-framework" ]] && continue
+
+    #Obtain which libraries are used
+    export PROJECT_LDL_LIBS=$(ls -d ${PROJECT}/vendor/ldl-framework/*)
+
+    #Delete all libraries
+    rm -rf ${REPO_LOCATION}/${PROJECT}/vendor/ldl-framework/*
+
+    for LDL_LIB in ${PROJECT_LDL_LIBS}; do
+        cd ${REPO_LOCATION}/${PROJECT}/vendor/ldl-framework
+        export LDL_LIB_NAME=$(basename ${LDL_LIB})
+        export LINK_DEST=$(readlink -f ${SYMLINK_VENDOR_DIR}/${LDL_LIB_NAME} | xargs basename)
+        ln -srf ../../../${LINK_DEST} ./${LDL_LIB_NAME}
+    done
 done
 
 stdout_work "Recreating composer autoloaders ..."
