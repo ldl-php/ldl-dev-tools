@@ -17,3 +17,4 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - fix/1201473814542517 - Update README.md with proper docker instructions
 - fix/1201474680403187 - Fix docs and installer command
 - fix/1201475529448879 - Git is not usable inside docker, needs SSH clone and SSH key mounted
+- fix/1201499524089018 - Symlinking does not resolves outside of container
