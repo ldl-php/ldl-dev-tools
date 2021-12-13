@@ -5,14 +5,17 @@
 export CONTAINER_NAME="ldl-dev"
 export SCRIPT_DIR="$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)";
 export DOCKER_DIR="${SCRIPT_DIR}/.."
-export LOCK_FILE="./docker/.docker-compose-installer"
+export LOCK_FILE="${SCRIPT_DIR}/../.docker-compose-installer"
 export INSTALLER_CMD="${SCRIPT_DIR}/../install.sh"
 
 source ${DOCKER_DIR}/usr/share/ldl_bash_utils
 
 cat ${DOCKER_DIR}/etc/motd
 
-[[ ! -f ${LOCK_FILE} || ! -z "${1}" ]] && ${INSTALLER_CMD}
+if [[ ! -f ${LOCK_FILE} || ! -z "${1}" ]]; then
+    ${INSTALLER_CMD};
+    [[ $? -gt 0 ]] && exit 1
+fi
 
 cd ${SCRIPT_DIR}/../../
 

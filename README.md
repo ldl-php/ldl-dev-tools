@@ -153,7 +153,10 @@ ldl-start
 
 - ldl-clone
 
-Will clone and fork all ldl projects in folder ~/ldl/projects
+Will clone and fork all ldl projects in folder ~/ldl/projects (inside the container). 
+
+*IMPORTANT:* if you have work that needs to be saved push it to your forked repository before running this command
+git stash will NOT work as all folders will be *deleted*
 
 - ccc 
 
