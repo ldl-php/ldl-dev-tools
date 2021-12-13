@@ -111,3 +111,5 @@ stdout_ok "Creating lock file ..."
 touch ${LOCK_FILE}
 
 stdout_ok "Docker build completed!"
+
+exit 0
