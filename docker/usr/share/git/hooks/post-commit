@@ -2,4 +2,6 @@
 
 source /usr/share/ldl_bash_utils
 
-env ldl-sync
+stdout_warning "Your changes were commited, you may want to synchronize your repo by running ldl-sync"
+stdout_warning "In case of any major conflicts, run git reset --hard HEAD"
+

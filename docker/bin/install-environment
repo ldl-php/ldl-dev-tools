@@ -18,7 +18,7 @@ env install-github-cli && \
 env install-php-composer && \
 run_as_ldl $(which ldl-clone)  && \
 cd /ldl-dev-tools && \
-env ccc  &>/dev/null && \
+run_as_ldl env ccc  &>/dev/null && \
 touch ${SETUP_LOCK} && \
 stdout_ok "LDL environment setup successfully!" && \
 exit 0
